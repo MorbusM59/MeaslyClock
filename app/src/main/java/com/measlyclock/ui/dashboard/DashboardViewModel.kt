@@ -1,6 +1,7 @@
 package com.measlyclock.ui.dashboard
 
 import androidx.lifecycle.ViewModel
+import com.measlyclock.data.Alarm
 import com.measlyclock.data.AlarmSet
 import com.measlyclock.data.CycleGroup
 import com.measlyclock.data.SetType
