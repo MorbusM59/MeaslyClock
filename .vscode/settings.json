@@ -1,0 +1,43 @@
+{
+  // ── Editor ────────────────────────────────────────────────────────────────
+  "editor.tabSize": 4,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnSave": true,
+  "editor.rulers": [120],
+  "editor.trimAutoWhitespace": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+
+  // ── Kotlin (covers both .kt and .kts / Gradle scripts) ──────────────────
+  "[kotlin]": {
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "fwcd.kotlin"
+  },
+
+  // ── XML (manifests, resources, drawables) ────────────────────────────────
+  "[xml]": {
+    "editor.tabSize": 4,
+    "editor.defaultFormatter": "redhat.vscode-xml"
+  },
+
+  // ── Files ─────────────────────────────────────────────────────────────────
+  "files.associations": {
+    "*.kts": "kotlin",
+    "*.kt":  "kotlin",
+    "gradlew": "shellscript"
+  },
+  "files.exclude": {
+    "**/.gradle": true,
+    "**/build": true,
+    "**/.idea": true,
+    "**/*.iml": true
+  },
+
+  // ── Search ────────────────────────────────────────────────────────────────
+  "search.exclude": {
+    "**/.gradle": true,
+    "**/build": true,
+    "**/.idea": true
+  }
+}
