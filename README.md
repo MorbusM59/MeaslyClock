@@ -42,14 +42,27 @@ The APK will be output to `app/build/outputs/apk/debug/app-debug.apk`.
 ```
 app/src/main/java/com/measlyclock/
 ├── MainActivity.kt                       # Entry point
+├── MeaslyClockApp.kt                     # Application class (DB + Repository init)
 ├── data/
-│   ├── Models.kt                         # AlarmSet, Alarm, CycleGroup data models
-│   └── SampleData.kt                     # In-memory sample data
+│   ├── Models.kt                         # AlarmSet, Alarm, CycleGroup domain models
+│   ├── Repository.kt                     # Data access layer (seeding, CRUD)
+│   ├── SampleData.kt                     # Seed data for first launch
+│   └── db/
+│       ├── AppDatabase.kt                # Room database singleton
+│       ├── Converters.kt                 # Type converters (Color, SetType, DayOfWeek)
+│       ├── AlarmSetEntity.kt             # Room entity for alarm sets
+│       ├── AlarmEntity.kt                # Room entity for individual alarms
+│       ├── CycleGroupEntity.kt           # Room entity for cycle groups
+│       ├── AlarmSetWithAlarms.kt         # @Relation join DTO
+│       ├── AlarmSetDao.kt                # DAO: observe, upsert, delete, toggle active
+│       ├── AlarmDao.kt                   # DAO: upsert, delete alarms
+│       └── CycleGroupDao.kt              # DAO: observe, upsert, set active member
 └── ui/
     ├── theme/                            # Material 3 theme (Color, Theme, Type)
     └── dashboard/
-        ├── DashboardViewModel.kt         # State management (StateFlow)
-        └── DashboardScreen.kt            # Dashboard Composables
+        ├── DashboardViewModel.kt         # State management (Room flows → StateFlow)
+        ├── DashboardScreen.kt            # Dashboard + FAB + swipe-to-dismiss
+        └── AddAlarmSetDialog.kt          # Dialog: name, color picker, type selector
 ```
 
 ## Current status
@@ -60,14 +73,16 @@ app/src/main/java/com/measlyclock/
 - Cycle logic: standalone (ON/OFF) and grouped (A/B/…/None)
 - Per-set color support (displayed as button background)
 - Active alarms list below each set (filtered by today's day of week)
-- In-memory sample data with 4 sets (Daily, Medication, Office, Home Office)
+- **Room database** persistence (alarm sets, alarms, cycle groups survive restarts)
+- **Sample data seed** on first launch (Daily, Medication, Office, Home Office sets)
+- **Add alarm set** via FAB → dialog (name + color picker + type selector)
+- **Delete alarm set** via swipe-left gesture on any row
 
 ### Planned / TODO
-- Room database persistence
 - AlarmManager scheduling for actual alarm ringing
 - BroadcastReceiver for alarm trigger
 - Boot reschedule receiver
+- Add/edit individual alarms within a set
 - Calendar planner screen for scheduling sets by date
-- Add/edit alarm set and alarm screens
-- Color picker UI for alarm sets
+- Color picker UI improvements (custom color input)
 - Snooze / dismiss flows
