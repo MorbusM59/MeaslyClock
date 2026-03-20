@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    // Kotlin language support + code intelligence
+    "fwcd.kotlin",
+    // Extension Pack for Java (includes debugger, test runner, Maven/Gradle support)
+    "vscjava.vscode-java-pack",
+    // Gradle build file language support
+    "naco-siren.gradle-language",
+    // XML editor for Android layouts/manifests/resources
+    "redhat.vscode-xml",
+    // File icons (helps distinguish .kt, .kts, .xml files)
+    "vscode-icons-team.vscode-icons",
+    // GitLens — supercharges GitHub Desktop's Git integration inside VS Code
+    "eamodio.gitlens",
+    // EditorConfig support (enforces consistent formatting across editors)
+    "editorconfig.editorconfig"
+  ]
+}
