@@ -39,5 +39,12 @@
     "**/.gradle": true,
     "**/build": true,
     "**/.idea": true
-  }
+  },
+
+  // ── Gradle Language Server ────────────────────────────────────────────────
+  // Use the project's own Gradle wrapper so the Language Server doesn't try
+  // to download or locate a separate Gradle installation (which causes the
+  // "Initializing Gradle Language Server" spinner to hang indefinitely).
+  "java.gradle.wrapper.enabled": true,
+  "gradle.nestedProjects": true
 }

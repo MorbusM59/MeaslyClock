@@ -120,7 +120,7 @@ class DashboardViewModel(private val repository: Repository) : ViewModel() {
 private fun AlarmSetWithAlarms.toDomain(): AlarmSet = AlarmSet(
     id = alarmSet.id,
     name = alarmSet.name,
-    color = alarmSet.color,
+    color = Color(alarmSet.colorValue.toULong()),
     type = alarmSet.type,
     groupId = alarmSet.groupId,
     isActive = alarmSet.isActive,
