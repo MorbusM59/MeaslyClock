@@ -1,17 +1,10 @@
 package com.measlyclock.data.db
 
-import androidx.compose.ui.graphics.Color
 import androidx.room.TypeConverter
 import com.measlyclock.data.SetType
 import java.time.DayOfWeek
 
 class Converters {
-    @TypeConverter
-    fun colorToLong(color: Color): Long = color.value.toLong()
-
-    @TypeConverter
-    fun longToColor(value: Long): Color = Color(value.toULong())
-
     @TypeConverter
     fun setTypeToString(type: SetType): String = type.name
 

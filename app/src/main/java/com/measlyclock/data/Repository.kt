@@ -18,7 +18,7 @@ class Repository(
     suspend fun addAlarmSet(name: String, color: Color, type: SetType, groupId: String? = null) {
         val id = UUID.randomUUID().toString()
         alarmSetDao.upsert(
-            AlarmSetEntity(id = id, name = name, color = color, type = type, groupId = groupId)
+            AlarmSetEntity(id = id, name = name, colorValue = color.value.toLong(), type = type, groupId = groupId)
         )
     }
 
@@ -57,7 +57,7 @@ class Repository(
                 AlarmSetEntity(
                     id = set.id,
                     name = set.name,
-                    color = set.color,
+                    colorValue = set.color.value.toLong(),
                     type = set.type,
                     groupId = set.groupId,
                     isActive = set.isActive
