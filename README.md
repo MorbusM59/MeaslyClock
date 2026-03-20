@@ -24,7 +24,7 @@ MeaslyClock is built around **alarm sets** — named collections of alarms that 
 ### Prerequisites
 
 - Android Studio Hedgehog or later (or Android SDK command-line tools)
-- JDK 11+
+- JDK 17+ (Android Studio bundles one; you do not need to install it separately)
 - Internet access to resolve Google Maven dependencies
 
 ### Clone and build
@@ -36,6 +36,52 @@ cd MeaslyClock
 ```
 
 The APK will be output to `app/build/outputs/apk/debug/app-debug.apk`.
+
+## Running in the emulator (Android Studio)
+
+If Android Studio hangs on **"Initializing Gradle Language Server"** or the
+Gradle sync spinner never disappears, follow the steps below.
+
+### 1. Open the project
+
+1. Launch **Android Studio**.
+2. Choose **File → Open…** and select the **`MeaslyClock`** root folder (the one that
+   contains `settings.gradle.kts`).  Do **not** open the `app/` sub-folder.
+3. Wait for the initial Gradle sync to finish (one-time download; ~2 min on a
+   fast connection).
+
+### 2. Fix a stuck "Initializing Gradle Language Server" spinner
+
+If the spinner does not resolve within 3–5 minutes:
+
+| Step | What to do |
+|------|-----------|
+| 1 | **File → Invalidate Caches…** → check all boxes → **Invalidate and Restart** |
+| 2 | After restart, let indexing finish (bottom status bar) |
+| 3 | If still stuck, open a terminal and run `./gradlew tasks` to verify the Gradle wrapper downloads correctly |
+
+> **Root cause (now fixed):** The repository previously set
+> `org.gradle.configuration-cache=true` in `gradle.properties`.  Configuration
+> cache can cause the IDE's Gradle tooling-API to hang on the first sync when
+> there is no pre-existing cache.  That flag has been removed.
+
+### 3. Create or start an emulator
+
+1. Open **Device Manager** (right toolbar or **View → Tool Windows → Device Manager**).
+2. Click **＋ Create Virtual Device**.
+3. Choose a phone profile (e.g. **Pixel 8**) → **Next**.
+4. Download an API **28–35** system image (e.g. **API 35 "VanillaIceCream"**) → **Next** → **Finish**.
+5. Press **▶** next to the new device to boot it.
+
+### 4. Run the app
+
+1. Select the **`app`** run configuration from the toolbar drop-down
+   (the `.run/app.run.xml` file committed to this repo makes it available
+   immediately without waiting for full project indexing).
+2. Press **Shift+F10** (or the green **▶ Run** button).
+3. Android Studio builds a debug APK and deploys it to the emulator.
+4. The MeaslyClock dashboard appears — sample alarm sets are seeded automatically
+   on the first launch.
 
 ## Project structure
 
