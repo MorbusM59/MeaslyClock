@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.measlyclock.data.SetType
 import androidx.compose.ui.Alignment
+import java.util.Locale
 
 private val PRESET_COLORS = listOf(
     Color(0xFF4CAF50), Color(0xFF2196F3), Color(0xFFE91E63),
@@ -55,7 +56,7 @@ fun AddAlarmSetDialog(
                         FilterChip(
                             selected = selectedType == type,
                             onClick = { selectedType = type },
-                            label = { Text(type.name.lowercase().replaceFirstChar { it.uppercase() }) }
+                            label = { Text(type.name.lowercase(Locale.getDefault()).replaceFirstChar { it.titlecase(Locale.getDefault()) }) }
                         )
                     }
                 }
