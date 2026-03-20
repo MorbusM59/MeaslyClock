@@ -1,16 +1,13 @@
 package com.measlyclock.ui.dashboard
 
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
-import com.measlyclock.data.Alarm
-import com.measlyclock.data.AlarmSet
-import com.measlyclock.data.CycleGroup
-import com.measlyclock.data.SetType
-import com.measlyclock.data.sampleAlarmSets
-import com.measlyclock.data.sampleCycleGroups
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.measlyclock.data.*
+import com.measlyclock.data.db.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 
@@ -19,44 +16,62 @@ data class DashboardUiState(
     val cycleGroups: List<CycleGroup> = emptyList()
 )
 
-class DashboardViewModel : ViewModel() {
+class DashboardViewModel(private val repository: Repository) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(
-        DashboardUiState(
-            alarmSets = sampleAlarmSets,
-            cycleGroups = sampleCycleGroups
-        )
-    )
+    private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
 
-    fun cycleSetState(setId: String) {
-        _uiState.update { state ->
-            val set = state.alarmSets.find { it.id == setId } ?: return@update state
+    init {
+        viewModelScope.launch {
+            combine(
+                repository.alarmSetsWithAlarms,
+                repository.cycleGroups
+            ) { setsWithAlarms, groups ->
+                // Seed sample data on first launch
+                repository.seedIfEmpty(setsWithAlarms)
+                DashboardUiState(
+                    alarmSets = setsWithAlarms.map { it.toDomain() },
+                    cycleGroups = groups.map { it.toDomain() }
+                )
+            }.collect { state ->
+                _uiState.value = state
+            }
+        }
+    }
 
+    fun cycleSetState(setId: String) {
+        val state = _uiState.value
+        val set = state.alarmSets.find { it.id == setId } ?: return
+        viewModelScope.launch {
             when (set.type) {
                 SetType.STANDALONE -> {
-                    val updatedSets = state.alarmSets.map {
-                        if (it.id == setId) it.copy(isActive = !it.isActive) else it
-                    }
-                    state.copy(alarmSets = updatedSets)
+                    repository.setStandaloneActive(setId, !set.isActive)
                 }
                 SetType.GROUPED -> {
-                    val groupId = set.groupId ?: return@update state
-                    val group = state.cycleGroups.find { it.id == groupId } ?: return@update state
+                    val groupId = set.groupId ?: return@launch
+                    val group = state.cycleGroups.find { it.id == groupId } ?: return@launch
                     val members = group.memberSetIds
                     val currentIndex = members.indexOf(group.activeSetId)
-                    // Cycle: each member in order, then null (none), then back to first
                     val nextActiveSetId = when {
-                        currentIndex == -1 -> members.first()           // null -> first
-                        currentIndex < members.size - 1 -> members[currentIndex + 1]  // next member
-                        else -> null                                     // last -> null
+                        currentIndex == -1 -> members.first()
+                        currentIndex < members.size - 1 -> members[currentIndex + 1]
+                        else -> null
                     }
-                    val updatedGroups = state.cycleGroups.map {
-                        if (it.id == groupId) it.copy(activeSetId = nextActiveSetId) else it
-                    }
-                    state.copy(cycleGroups = updatedGroups)
+                    repository.setCycleGroupActiveSet(groupId, nextActiveSetId)
                 }
             }
+        }
+    }
+
+    fun addAlarmSet(name: String, color: Color, type: SetType) {
+        viewModelScope.launch {
+            repository.addAlarmSet(name, color, type)
+        }
+    }
+
+    fun deleteAlarmSet(setId: String) {
+        viewModelScope.launch {
+            repository.deleteAlarmSet(setId)
         }
     }
 
@@ -91,4 +106,39 @@ class DashboardViewModel : ViewModel() {
         val activeName = state.alarmSets.find { it.id == group.activeSetId }?.name
         return activeName ?: "None"
     }
+
+    companion object {
+        fun factory(repository: Repository) = object : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                DashboardViewModel(repository) as T
+        }
+    }
 }
+
+// --- Domain mappers ---
+private fun AlarmSetWithAlarms.toDomain(): AlarmSet = AlarmSet(
+    id = alarmSet.id,
+    name = alarmSet.name,
+    color = alarmSet.color,
+    type = alarmSet.type,
+    groupId = alarmSet.groupId,
+    isActive = alarmSet.isActive,
+    alarms = alarms.map { it.toDomain() }
+)
+
+private fun AlarmEntity.toDomain(): Alarm = Alarm(
+    id = id,
+    label = label,
+    hour = hour,
+    minute = minute,
+    repeatDays = repeatDays,
+    enabled = enabled
+)
+
+private fun CycleGroupEntity.toDomain(): CycleGroup = CycleGroup(
+    id = id,
+    name = name,
+    memberSetIds = memberSetIds,
+    activeSetId = activeSetId
+)
